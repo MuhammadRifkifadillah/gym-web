@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gym Tutorial Login</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        /* Background image of people working out at gym */
+        background: url("image.png") no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 1rem;
+      }
+      .container {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 360px;
+        max-width: 100%;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+        position: relative;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+      }
+      label {
+        display: block;
+        margin: 0.75rem 0 0.25rem;
+        font-weight: 600;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        outline: none;
+        transition: box-shadow 0.3s ease;
+      }
+      input[type="text"]:focus,
+      input[type="password"]:focus {
+        box-shadow: 0 0 8px 2px #a47aff;
+      }
+      button {
+        margin-top: 1.5rem;
+        width: 100%;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        background-color: #a47aff;
+        color: #fff;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background-color: #854ddd;
+      }
+      .loading {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .loading.visible {
+        display: flex;
+      }
+      .spinner {
+        border: 5px solid rgba(255, 255, 255, 0.2);
+        border-top: 5px solid #fff;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .error-msg {
+        color: #ff6b6b;
+        margin-top: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+      }
+      .success-msg {
+        color: #8fff8a;
+        margin-top: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+      }
+      .register-link {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      .register-link button {
+        background: none;
+        border: none;
+        color: #c7b9ff;
+        text-decoration: underline;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+      .register-link button:hover {
+        color: #fff;
+      }
+      .register-form {
+        display: none;
+        flex-direction: column;
+      }
+      .register-form.visible {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="login-container">
+      <h2 id="form-title">Login to Gym Tutorial</h2>
+
+      <form id="login-form" autocomplete="off">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          placeholder="Enter username"
+          required
+        />
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter password"
+          required
+        />
+        <button type="submit">Login</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="success-msg" id="login-success"></div>
+      </form>
+
+      <form id="register-form" class="register-form" autocomplete="off">
+        <label for="reg-username">Choose Username</label>
+        <input
+          type="text"
+          id="reg-username"
+          placeholder="Enter new username"
+          required
+        />
+        <label for="reg-password">Choose Password</label>
+        <input
+          type="password"
+          id="reg-password"
+          placeholder="Enter new password"
+          required
+        />
+        <button type="submit">Register</button>
+        <div class="error-msg" id="register-error"></div>
+        <div class="success-msg" id="register-success"></div>
+      </form>
+
+      <div class="register-link" id="register-link">
+        <span id="toggle-text">Don't have an account?</span>
+        <button id="toggle-register">Register here</button>
+      </div>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <span>Logging in...</span>
+      </div>
+    </div>
+
+    <script>
+      const loginForm = document.getElementById("login-form");
+      const registerForm = document.getElementById("register-form");
+      const loginError = document.getElementById("login-error");
+      const loginSuccess = document.getElementById("login-success");
+      const registerError = document.getElementById("register-error");
+      const registerSuccess = document.getElementById("register-success");
+      const loading = document.getElementById("loading");
+      const toggleRegisterBtn = document.getElementById("toggle-register");
+      const toggleText = document.getElementById("toggle-text");
+      const formTitle = document.getElementById("form-title");
+
+      const STORAGE_KEY = "gymTutorialUsers";
+      const SESSION_KEY = "gymTutorialLoggedInUser";
+
+      function loadUsers() {
+        const usersJson = localStorage.getItem(STORAGE_KEY);
+        return usersJson ? JSON.parse(usersJson) : {};
+      }
+
+      function saveUsers(users) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+      }
+
+      function setSessionUser(username) {
+        sessionStorage.setItem(SESSION_KEY, username);
+      }
+      function getSessionUser() {
+        return sessionStorage.getItem(SESSION_KEY);
+      }
+
+      function hashPassword(password) {
+        return btoa(password);
+      }
+
+      function showLogin() {
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+        loginError.textContent = "";
+        loginSuccess.textContent = "";
+        registerError.textContent = "";
+        registerSuccess.textContent = "";
+        toggleText.textContent = "Don't have an account?";
+        toggleRegisterBtn.textContent = "Register here";
+        formTitle.textContent = "Login to Gym Tutorial";
+      }
+
+      function showRegister() {
+        loginForm.style.display = "none";
+        registerForm.style.display = "flex";
+        loginError.textContent = "";
+        loginSuccess.textContent = "";
+        registerError.textContent = "";
+        registerSuccess.textContent = "";
+        toggleText.textContent = "Already have an account?";
+        toggleRegisterBtn.textContent = "Login here";
+        formTitle.textContent = "Register New Account";
+      }
+
+      toggleRegisterBtn.addEventListener("click", () => {
+        if (registerForm.style.display === "flex") {
+          showLogin();
+          loginForm.username.focus();
+        } else {
+          showRegister();
+          registerForm["reg-username"].focus();
+        }
+      });
+
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        loginError.textContent = "";
+        loginSuccess.textContent = "";
+        const username = loginForm.username.value.trim();
+        const password = loginForm.password.value;
+        if (!username || !password) {
+          loginError.textContent = "Please enter both username and password.";
+          return;
+        }
+        const users = loadUsers();
+        if (!users[username]) {
+          loginError.textContent = "User not found. Please register first.";
+          return;
+        }
+        if (users[username] !== hashPassword(password)) {
+          loginError.textContent = "Incorrect password.";
+          return;
+        }
+        loading.classList.add("visible");
+        loginForm.style.display = "none";
+        setTimeout(() => {
+          loading.classList.remove("visible");
+          setSessionUser(username);
+          loginSuccess.textContent = "Login successful! Redirecting...";
+          window.location.href = "dashboard.html";
+        }, 1500);
+      });
+
+      registerForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        registerError.textContent = "";
+        registerSuccess.textContent = "";
+        const username = registerForm["reg-username"].value.trim();
+        const password = registerForm["reg-password"].value;
+        if (!username || !password) {
+          registerError.textContent = "Please fill in all fields.";
+          return;
+        }
+        let users = loadUsers();
+        if (users[username]) {
+          registerError.textContent =
+            "Username already exists, please choose another.";
+          return;
+        }
+        users[username] = hashPassword(password);
+        saveUsers(users);
+        registerSuccess.textContent =
+          "Registration successful! You can now login.";
+        setTimeout(() => {
+          showLogin();
+          loginForm.username.focus();
+        }, 1500);
+      });
+
+      window.onload = () => {
+        if (getSessionUser()) {
+          window.location.href = "dashboard.html";
+        } else {
+          showLogin();
+        }
+      };
+    </script>
+  </body>
+</html>

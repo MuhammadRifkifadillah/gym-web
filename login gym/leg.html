@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chest Workout</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+        background: url("https://images.unsplash.com/photo-1599058917212-d750089bc04f?auto=format&fit=crop&w=1470&q=80")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        min-height: 100vh;
+        backdrop-filter: brightness(0.8);
+      }
+
+      h1 {
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        max-width: 600px;
+        width: 100%;
+      }
+
+      li {
+        background: rgba(0, 0, 0, 0.6);
+        margin: 0.5rem 0;
+        padding: 1rem;
+        border-radius: 8px;
+        font-size: 1.1rem;
+      }
+
+      .back-btn {
+        margin-top: 2rem;
+        padding: 0.75rem 1.5rem;
+        background-color: #a47aff;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      .back-btn:hover {
+        background-color: #854ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Leg Workout</h1>
+    <ul>
+      <li>Squat – 4 sets of 8 reps</li>
+      <li>Leg Press – 3 sets of 10 reps</li>
+      <li>Lunges – 3 sets of 12 reps</li>
+      <li>Leg Curls – 3 sets of 12 reps</li>
+    </ul>
+
+    <button class="back-btn" onclick="goBack()">Back to Dashboard</button>
+
+    <script>
+      function goBack() {
+        window.location.href = "dashboard.html";
+      }
+    </script>
+  </body>
+</html>
